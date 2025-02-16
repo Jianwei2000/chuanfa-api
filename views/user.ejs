@@ -62,7 +62,11 @@
 
             }
 
-            button {
+            .btn {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-decoration: none;
                 background-color: rgb(39, 38, 35);
                 color: #FFF;
                 font-size: 1.2rem;
@@ -87,10 +91,10 @@
         <nav class="page">
             <form class="search">
                 <input type="search" name="keyword" value="<%= keyword %>">
-                <button type="submit">搜尋</button>
+                <button class="btn" type="submit">搜尋</button>
             </form>
 
-            <button>新增會員</button>
+            <a class="btn" href="/user/add">新增會員</a>
 
             <ul>
                 <li>

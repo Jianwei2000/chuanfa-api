@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-hant-TW">
+
+<head>
+    <%- include("./parts/head.ejs") %>
+    <style>
+        .title {
+            text-align: center;
+            margin: 50px 0;
+            font-size: 2.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include("./parts/navbar.ejs") %>
+    <div class="container">
+        <h1 class="title">新增會員資料</h1>
+        <div class="card">
+            <form>
+                <div class="mb-3">
+                    <label for="name" class="form-label">姓名</label>
+                    <input type="text" class="form-control" id="name" name="name">
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email">
+                </div>
+                <div class="mb-3">
+                    <label for="mobile" class="form-label">手機</label>
+                    <input type="text" class="form-control" id="mobile" name="mobile">
+                </div>
+                <div class="mb-3">
+                    <label for="birthday" class="form-label">生日</label>
+                    <input type="date" class="form-control" id="birthday" name="birthday">
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">地址</label>
+                    <input type="text" class="form-control" id="address" name="address">
+                </div>
+                <button type="submit" class="btn btn-primary">新增</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+
+    </script>
+</body>
+
+</html>

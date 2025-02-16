@@ -2,9 +2,9 @@
   "type": "module",
   "name": "nodejs",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "nodemon --env-file=dev.env app.js",
+    "dev": "nodemon --env-file=dev.env server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

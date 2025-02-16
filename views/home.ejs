@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-hant-TW">
+
+<head>
+    <%- include("./parts/head.ejs") %>
+    <style>
+        .title {
+            text-align: center;
+            margin: 50px 0;
+            font-size: 2.5rem;
+        }
+
+        .table {
+            border: 2px solid gray;
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 50px;
+
+            th {
+                border: 1px solid gray;
+                padding: 20px;
+            }
+
+            td {
+                padding: 20px;
+                border: 1px solid gray;
+            }
+        }
+
+        .page {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+
+            ul {
+                display: flex;
+                list-style: none;
+
+                li {
+                    padding: 10px;
+                    border: 1px solid gray;
+                    margin: 0 5px;
+
+                    a {
+                        text-decoration: none;
+                    }
+
+                    &.active {
+                        background-color: rgb(39, 38, 35);
+
+                        a {
+                            color: #FFF;
+                        }
+                    }
+                }
+            }
+
+            .search {
+                display: flex;
+
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include("./parts/navbar.ejs") %>
+    <div class="container">
+        <h1 class="title">讀取資料</h1>
+
+        <nav class="page">
+            <ul>
+                <li>
+                    <a href="#">
+                        <span>&laquo;</span>
+                    </a>
+                </li>
+                <% for(let i=page-3; i<=page+3; i++){
+                    if(i >= 1 && i <= totalPages){ %>
+                <li class="<%= i==page? "active" : "" %>">
+                    <a href="?page=<%= i %>">
+                        <%= i %>
+                    </a>
+                </li>
+                <% } }%>
+                <li>
+                    <a href="#">
+                        <span>&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="search">
+                <input type="text">
+                <button>搜尋</button>
+            </div>
+        </nav>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">姓名</th>
+                    <th scope="col">信箱</th>
+                    <th scope="col">手機</th>
+                    <th scope="col">生日</th>
+                    <th scope="col">地址</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% rows.forEach((row)=>{ %>
+                <tr>
+                    <td><%= row.ab_id %></td>
+                    <td><%= row.name %></td>
+                    <td><%= row.email %></td>
+                    <td><%= row.mobile %></td>
+                    <td><%= row.birthday %></td>
+                    <td><%= row.address %></td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+
+    </script>
+</body>
+
+</html>

@@ -18,11 +18,11 @@
 
             th {
                 border: 1px solid gray;
-                padding: 20px;
+                padding: 10px;
             }
 
             td {
-                padding: 20px;
+                padding: 10px;
                 border: 1px solid gray;
             }
         }
@@ -43,6 +43,8 @@
 
                     a {
                         text-decoration: none;
+                        color: black;
+                        font-weight: bold;
                     }
 
                     &.active {
@@ -92,7 +94,7 @@
 
             <ul>
                 <li>
-                    <a href="#">
+                    <a href="?page=<%= page-1 %>">
                         <span>&laquo;</span>
                     </a>
                 </li>
@@ -105,7 +107,7 @@
                 </li>
                 <% } }%>
                 <li>
-                    <a href="#">
+                    <a href="?page=<%= page+1 %>">
                         <span>&raquo;</span>
                     </a>
                 </li>

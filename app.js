@@ -1,5 +1,5 @@
 import express from "express";
-import home from "./routes/index.js";
+import user from "./routes/user.js";
 
 const app = express();
 //註冊樣板引擎
@@ -7,8 +7,12 @@ app.set("view engine", "ejs");
 //設定靜態內容資料夾
 app.use(express.static("public"));
 
-//定義主頁路由
-app.use("/", home);
+//設定主頁路由
+app.get("/",(req,res)=>{
+    res.render("home");
+})
+//定義user路由
+app.use("/user", user);
 
 
 //設定404頁面

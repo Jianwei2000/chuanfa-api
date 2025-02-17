@@ -6,6 +6,7 @@ const app = express();
 
 //中間件
 app.use(cors());
+app.use(express.json());
 
 //設定users API路由
 app.use("/users", usersApi);
@@ -14,7 +15,7 @@ app.use("/users", usersApi);
 app.use((req, res) => {
     res.status(404);
     res.send(`
-        <h1 style=" text-align: center;;">404 迷路了嗎?</h1>
+        <h1 style=" text-align: center;">404 迷路了嗎?</h1>
     `);
 })
 

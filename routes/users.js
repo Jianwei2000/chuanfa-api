@@ -157,81 +157,63 @@ router.get("/:id",async (req,res)=>{
 
 // 修改會員
 router.put("/:id", async (req, res) => {
-  const { id } = req.params; // 取得要修改的會員 ID
+  const { id } = req.params;
   const {
-    name,
+    user_name: name, // 修正變數名稱
     email,
-    password,
-    mobile,
-    birthday = null,
-    address = "",
+    phone_number: mobile, // 修正變數名稱
+    birthday,
+    address
   } = req.body;
 
-  // 驗證資料是否完整
-  if (!name || !email || !password || !mobile) {
-    return res.status(400).json({
-      error: "姓名，信箱，密碼，手機 為必填",
-    });
-  }
+  const formattedBirthday = birthday && birthday.trim() !== "" ? birthday : null;
+  const formattedAddress = address || "";
+
+  console.log("接收到的請求內容:", req.body);
 
   try {
-    // 檢查該會員是否存在
-    const [existingUser] = await db.query(
-      `SELECT * FROM users WHERE user_id = ?`,
-      [id]
-    );
-
-    if (!existingUser) {
-      return res.status(404).json({
-        error: "找不到該會員",
-      });
+    if (!name || !email || !mobile) {
+      return res.status(400).json({ error: "請提供完整的會員資料" });
     }
 
-    // 如果有提供新密碼，則對新密碼進行雜湊處理
-    let passwordHash = existingUser.password_hash; // 預設為原本的密碼
-    if (password) {
-      passwordHash = await bcrypt.hash(password, 10); // 10 是鹽值 (salt)
+    const userId = Number(id); // 確保 ID 是數字
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: "會員 ID 無效" });
     }
 
-    // 更新會員資料
-    const result = await db.query(
+    const [rows] = await db.query(`SELECT * FROM users WHERE user_id = ?`, [userId]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "找不到該會員" });
+    }
+
+    const [result] = await db.query(
       `UPDATE users SET 
         user_name = ?, 
-        email = ?, 
-        password_hash = ?, 
+        email = ?,  
         phone_number = ?, 
         address = ?, 
         birthday = ? 
       WHERE user_id = ?`,
-      [name, email, passwordHash, mobile, address, birthday, id]
+      [name, email, mobile, formattedAddress, formattedBirthday, userId]
     );
 
-    // 更新成功後，回傳成功訊息
+    console.log("更新結果:", result);
+
     if (result.affectedRows > 0) {
       res.status(200).json({
         message: "會員資料更新成功",
-        user: {
-          id,
-          name,
-          email,
-          mobile,
-          birthday,
-          address,
-        },
+        user: { id: userId, name, email, mobile, birthday: formattedBirthday, address: formattedAddress },
       });
     } else {
-      res.status(400).json({
-        error: "會員資料未更新，請確認您的資料是否有變更",
-      });
+      res.status(400).json({ error: "會員資料未更新，請確認您的資料是否有變更" });
     }
   } catch (err) {
-    console.error("修改會員錯誤:", err);
-    res.status(500).json({
-      error: "修改會員資料失敗，請稍後再試",
-      detail: err.message,
-    });
+    console.error("修改會員錯誤:", err.message, err);
+    res.status(500).json({ error: "修改會員資料失敗，請稍後再試", detail: err.message });
   }
 });
+
+
 
 
 export default router;

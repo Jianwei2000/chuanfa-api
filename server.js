@@ -11,14 +11,6 @@ app.use(express.json());
 //設定users API路由
 app.use("/users", usersApi);
 
-//設定404頁面
-app.use((req, res) => {
-    res.status(404);
-    res.send(`
-        <h1 style=" text-align: center;">404 迷路了嗎?</h1>
-    `);
-})
-
 //設定Server端口
 const port = process.env.WEB_PORT || 3000;
 

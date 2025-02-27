@@ -1,5 +1,6 @@
 import express from "express";
 import userRoutes from "./routes/userRoutes.js"
+import productRoutes from "./routes/productRoutes.js"
 import cors from "cors";
 
 const app = express();
@@ -10,6 +11,7 @@ app.use(express.json());
 
 //設定users API路由
 app.use("/users", userRoutes);
+app.use("/products", productRoutes);
 
 //設定Server端口
 const port = process.env.WEB_PORT || 3000;

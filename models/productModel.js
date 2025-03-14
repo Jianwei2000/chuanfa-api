@@ -40,6 +40,17 @@ const Product = {
     );
     return result.length ? result[0] : null;
   },
+
+  //取得商品所有圖片
+  getImages: async (id) => {
+    const [images] = await db.query(
+      `
+        SELECT *  FROM product_images
+        WHERE  product_id = ?`,
+      [id]
+    );
+    return images;
+  },
 };
 
 export default Product;

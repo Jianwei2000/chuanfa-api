@@ -28,3 +28,14 @@ export const getProductById = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// 取得商品圖
+export const getProductImages = async (req, res) => {
+  try {
+    const product = await Product.getImages(req.params.id);
+    if (!product) return res.status(404).json({ error: "圖片不存在" });
+    res.json({ message: "商品圖片取得成功", product });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

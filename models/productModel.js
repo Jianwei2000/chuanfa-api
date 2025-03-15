@@ -2,11 +2,22 @@ import db from "../config/database.js";
 
 const Product = {
   // 取得所有商品（含搜尋、分類、載入更多）
-  getAll: async ( category, limit, offset) => {
+  getAll: async (category, limit, offset, sortBy) => {
     const categoryQuery = category ? `WHERE category = ?` : "";
     const params = [];
 
     if (category) params.push(category);
+
+    // 加入排序條件
+    let orderBy = "ORDER BY products.product_id DESC"; // 預設是根據商品 ID 降冪排列（最新）
+
+    if (sortBy === "latest") {
+      orderBy = "ORDER BY products.create_time DESC";
+    } else if (sortBy === "price_desc") {
+      orderBy = "ORDER BY products.price DESC"; // 價格從高到低排序
+    } else if (sortBy === "price_asc") {
+      orderBy = "ORDER BY products.price ASC"; // 價格從低到高排序
+    }
 
     params.push(Number(limit)); // 限制每次載入的數量
     params.push(Number(offset)); // 偏移量，用於載入更多
@@ -16,7 +27,7 @@ const Product = {
         LEFT JOIN product_images ON product_images.product_id = products.product_id 
         ${categoryQuery}
         AND (product_images.is_main = 1 OR product_images.product_id IS NULL) 
-        ORDER BY products.product_id DESC 
+        ${orderBy}
         LIMIT ? OFFSET ?`,
       params
     );
@@ -25,8 +36,7 @@ const Product = {
   },
 
   // 取得商品總數
-  getTotalCount: async ( category) => {
-
+  getTotalCount: async (category) => {
     const categoryQuery = category ? `WHERE category = ?` : "";
     const params = [];
 

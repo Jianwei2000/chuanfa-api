@@ -2,11 +2,11 @@ import Product from "../models/productModel.js";
 
 // 取得商品資料（含分類與載入更多）
 export const getProducts = async (req, res) => {
-  const { category = "", page = 1, limit = 8 } = req.query;
+  const { category = "", page = 1, limit = 8, sortBy = "latest" } = req.query;
   const offset = (page - 1) * limit;
 
   try {
-    const products = await Product.getAll(category, limit, offset);
+    const products = await Product.getAll(category, limit, offset, sortBy);
     const totalRecords = await Product.getTotalCount(category);
     const totalPages = Math.ceil(totalRecords / limit);
 

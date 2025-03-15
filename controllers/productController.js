@@ -1,14 +1,13 @@
 import Product from "../models/productModel.js";
 
-// 取得商品資料（含搜尋與分頁）
+// 取得商品資料（含分類與載入更多）
 export const getProducts = async (req, res) => {
-  const { keyword = "", page = 1, limit = 15 } = req.query;
+  const { category = "", page = 1, limit = 8 } = req.query;
   const offset = (page - 1) * limit;
-  const searchValue = keyword ? `%${keyword}%` : null;
 
   try {
-    const products = await Product.getAll(searchValue, limit, offset);
-    const totalRecords = await Product.getTotalCount(searchValue);
+    const products = await Product.getAll(category, limit, offset);
+    const totalRecords = await Product.getTotalCount(category);
     const totalPages = Math.ceil(totalRecords / limit);
 
     res.json({ products, page, totalPages, totalRecords });
@@ -16,7 +15,6 @@ export const getProducts = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 // 取得單一商品
 export const getProductById = async (req, res) => {

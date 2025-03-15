@@ -1,30 +1,40 @@
 import db from "../config/database.js";
 
 const Product = {
-  // 取得所有商品（含搜尋、分頁）
-  getAll: async (keyword, limit, offset) => {
-    const searchQuery = keyword ? `WHERE product_name LIKE ?` : "";
-    const params = keyword
-      ? [keyword, Number(limit), Number(offset)]
-      : [Number(limit), Number(offset)];
+  // 取得所有商品（含搜尋、分類、載入更多）
+  getAll: async ( category, limit, offset) => {
+    const categoryQuery = category ? `WHERE category = ?` : "";
+    const params = [];
+
+    if (category) params.push(category);
+
+    params.push(Number(limit)); // 限制每次載入的數量
+    params.push(Number(offset)); // 偏移量，用於載入更多
+
     const [products] = await db.query(
       `SELECT *, products.product_id FROM products
         LEFT JOIN product_images ON product_images.product_id = products.product_id 
-        ${searchQuery}
+        ${categoryQuery}
         AND (product_images.is_main = 1 OR product_images.product_id IS NULL) 
         ORDER BY products.product_id DESC 
         LIMIT ? OFFSET ?`,
       params
     );
+
     return products;
   },
 
   // 取得商品總數
-  getTotalCount: async (keyword) => {
-    const searchQuery = keyword ? `WHERE product_name LIKE ?` : "";
+  getTotalCount: async ( category) => {
+
+    const categoryQuery = category ? `WHERE category = ?` : "";
+    const params = [];
+
+    if (category) params.push(category);
+
     const [result] = await db.query(
-      `SELECT COUNT(*) as total FROM products ${searchQuery}`,
-      keyword ? [keyword] : []
+      `SELECT COUNT(*) as total FROM products ${categoryQuery}`,
+      params
     );
     return result[0].total;
   },

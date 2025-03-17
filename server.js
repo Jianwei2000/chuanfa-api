@@ -2,6 +2,8 @@ import express from "express";
 import userRoutes from "./routes/userRoutes.js"
 import productRoutes from "./routes/productRoutes.js"
 import articleRoutes from "./routes/articleRoutes.js"
+import couponRoutes from "./routes/couponRoutes.js"
+
 import cors from "cors";
 import { fileURLToPath } from "url";
 import path from "path";
@@ -19,10 +21,11 @@ app.use(express.json());
 // 設定靜態文件目錄
 app.use("/images", express.static(path.join(__dirname, "public", "images"))); // 靜態文件路徑
 
-//設定users API路由
+//設定 API路由
 app.use("/users", userRoutes);
 app.use("/products", productRoutes);
 app.use("/articles", articleRoutes);
+app.use("/coupons", couponRoutes);
 
 //設定Server端口
 const port = process.env.WEB_PORT || 3000;

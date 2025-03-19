@@ -1,8 +1,9 @@
 import express from "express";
-import userRoutes from "./routes/userRoutes.js"
-import productRoutes from "./routes/productRoutes.js"
-import articleRoutes from "./routes/articleRoutes.js"
-import couponRoutes from "./routes/couponRoutes.js"
+import userRoutes from "./routes/userRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import articleRoutes from "./routes/articleRoutes.js";
+import couponRoutes from "./routes/couponRoutes.js";
+import shipmentRoutes from "./routes/shipmentRoutes.js";
 
 import cors from "cors";
 import { fileURLToPath } from "url";
@@ -26,11 +27,12 @@ app.use("/users", userRoutes);
 app.use("/products", productRoutes);
 app.use("/articles", articleRoutes);
 app.use("/coupons", couponRoutes);
+app.use("/shipment", shipmentRoutes);
 
 //設定Server端口
 const port = process.env.WEB_PORT || 3000;
 
 //偵聽Server
 app.listen(port, () => {
-    console.log(`Server啟動，偵聽的端口:${port}`);
-})
+  console.log(`Server啟動，偵聽的端口:${port}`);
+});

@@ -18,6 +18,15 @@ const app = express();
 //中間件
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+//除錯用
+// app.use((req, res, next) => {
+//   console.log(`🔍 收到請求: ${req.method} ${req.url}`);
+//   console.log("🔍 查詢參數 (req.query):", req.query);
+//   console.log("🔍 請求主體 (req.body):", req.body);
+//   next();
+// });
 
 // 設定靜態文件目錄
 app.use("/images", express.static(path.join(__dirname, "public", "images"))); // 靜態文件路徑

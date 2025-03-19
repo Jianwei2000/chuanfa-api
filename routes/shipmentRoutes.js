@@ -2,11 +2,30 @@ import express from "express";
 
 const router = express.Router();
 
-// 當前端發送 POST 請求到 /shipment/711 時，將資料重定向到前端伺服器
 router.post('/711', function (req, res) {
-    // 將 req.body 轉換為 URL 查詢參數，並重定向到前端
-    const queryParams = new URLSearchParams(req.body).toString();
-    res.redirect(`http://127.0.0.1:3000/ship/callback?${queryParams}`);
-  });
+ const selectedStore = {
+  id: req.body.storeid,     
+  name: req.body.storename,  
+  address: req.body.storeaddress, 
+ }
+
+ console.log("選擇的門市資訊:",selectedStore);
+
+ res.send(`
+ <html>
+      <head>
+        <script>
+          const selectedStore = ${JSON.stringify(selectedStore)};
+          window.opener.postMessage(selectedStore, "*");
+          window.close();
+        </script>
+      </head>
+      <body>
+        <p>傳送門市資訊中，請稍候...</p>
+      </body>
+    </html>
+`);
+
+});
 
 export default router;

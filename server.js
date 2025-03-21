@@ -4,6 +4,7 @@ import productRoutes from "./routes/productRoutes.js";
 import articleRoutes from "./routes/articleRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
 import shipmentRoutes from "./routes/shipmentRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 import cors from "cors";
 import { fileURLToPath } from "url";
@@ -37,6 +38,7 @@ app.use("/products", productRoutes);
 app.use("/articles", articleRoutes);
 app.use("/coupons", couponRoutes);
 app.use("/shipment", shipmentRoutes);
+app.use("/orders", orderRoutes);
 
 //設定Server端口
 const port = process.env.WEB_PORT || 3000;

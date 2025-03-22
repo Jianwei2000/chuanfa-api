@@ -6,6 +6,7 @@ import couponRoutes from "./routes/couponRoutes.js";
 import shipmentRoutes from "./routes/shipmentRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import sendmailRoutes from "./routes/sendmailRoutes.js";
+import ecpayRoutes from "./routes/ecpayRoutes.js";
 
 import cors from "cors";
 import { fileURLToPath } from "url";
@@ -41,6 +42,7 @@ app.use("/coupons", couponRoutes);
 app.use("/shipment", shipmentRoutes);
 app.use("/orders", orderRoutes);
 app.use("/sendmail", sendmailRoutes);
+app.use("/ecpay", ecpayRoutes);
 
 
 //設定Server端口

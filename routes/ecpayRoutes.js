@@ -1,7 +1,9 @@
 import express from 'express'
 const router = express.Router()
 import * as crypto from 'crypto'
-
+import {
+    sendOrderMail,
+  } from "../controllers/sendmailController.js";
 
 router.get("/",function(req,res){
      // 目前只需要一個參數，總金額。其它的可以自行設定
@@ -38,7 +40,7 @@ router.get("/",function(req,res){
   // (二選一)以下這個設定，會有回傳結果，但要用前端的api路由來接收並協助重新導向到前端成功callback頁面(不用時下面要83~97從中的值要註解)
   //const OrderResultURL = 'http://localhost:3000/ecpay/api' //前端成功頁面api路由(POST)
   // (二選一)以下這個設定，不會任何回傳結果(不用時下面要83~97從中的值要註解)
-  const ClientBackURL = 'http://127.0.0.1:3000/store/order/1/finish' //前端成功頁面
+  const ClientBackURL = `http://127.0.0.1:3000/store/order/${MerchantTradeNo}/finish` //前端成功頁面
   const ChoosePayment = 'ALL'
 
   ////////////////////////以下參數不用改////////////////////////
@@ -173,7 +175,13 @@ router.get("/",function(req,res){
   // 送至react前端，由前端產生表單控制送出的動作
   // 這是為了在前端可以更靈活的控制送出的動作
   // action: 表單送出的網址, params: 所有表單中的欄位參數值
+
+  
+  
   res.status(200).json({ action: APIURL, params: AllParams });
+
 })
+
+
 
 export default router;

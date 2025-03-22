@@ -32,3 +32,26 @@ export const createOrder = async (req, res) => {
       res.status(500).json({ error: "訂單建立失敗", detail: err.message });
     }
   };
+
+
+  // ID取得訂單所有資料
+export const getOrderById = async (req, res) => {
+  try {
+    const order  = await Order.getById(req.params.id);
+    if (!order) return res.status(404).json({ error: "訂單不存在" });
+    res.json({ message: "訂單資料取得成功", order });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+//訂單ID取得購買的商品
+export const getProductsById = async(req,res) =>{
+  try {
+    const orderProducts  = await Order.getProducts(req.params.id);
+    if (!orderProducts) return res.status(404).json({ error: "找無資料" });
+    res.json({ message: "購買的商品資料取得成功", orderProducts });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}

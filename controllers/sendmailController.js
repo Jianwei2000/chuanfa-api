@@ -3,6 +3,7 @@ import nodemailer from "nodemailer";
 const {EMAIL_USER, EMAIL_PASS} = process.env;
 console.log("EMAIL_USER:", EMAIL_USER);
 console.log("EMAIL_PASS:", EMAIL_PASS ? "Loaded" : "Not Loaded");
+
 export const sendOrderMail = async (req, res) => {
     const { order_id, user_name, email, recipientName, recipientPhone, total_amount } = req.body;
 

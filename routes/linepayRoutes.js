@@ -14,18 +14,19 @@ const linePayClient = createLinePayClient({
   env: process.env.NODE_ENV,
 })
 
-// 設定重新導向與失敗導向的網址
-const redirectUrls = {
-  confirmUrl: `http://127.0.0.1:3000/store/order/1/finish`,
-  cancelUrl: `http://127.0.0.1:3000/store/order/1/pay`,
-}
 
 // 回應line-pay交易網址到前端，由前端導向line pay付款頁面
 // 資料格式參考 https://enylin.github.io/line-pay-merchant/api-reference/request.html#example
 router.get('/reserve', async (req, res) => {
+  // 設定重新導向與失敗導向的網址
+  const redirectUrls = {
+    confirmUrl: `http://127.0.0.1:3000/store/order/${req.query.orderId}/finish`,
+    cancelUrl: `http://127.0.0.1:3000/store/order/${req.query.orderId}/pay`,
+  }
   // 只需要金額，其它都是範例資料
   const amount = req.query.amount
-
+  const items = req.query.items
+ 
   // 使用目前最新的v3版本的API，以下是資料的說明:
   // https://pay.line.me/jp/developers/apis/onlineApis?locale=zh_TW
 
@@ -57,7 +58,7 @@ router.get('/reserve', async (req, res) => {
         products: [
           {
             id: crypto.randomBytes(5).toString('hex'),
-            name: '商品一批',
+            name: items,
             quantity: 1,
             price: amount,
           },

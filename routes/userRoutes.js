@@ -11,23 +11,23 @@ import { getUserById } from "../controllers/userController.js";
 const router = express.Router();
 
 // 初始化 Firebase Admin SDK
-const serviceAccount = JSON.parse(
-  fs.readFileSync(
-    "./config/membership-system-7d179-firebase-adminsdk-fbsvc-51cab596a2.json"
-  )
-);
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+// const serviceAccount = JSON.parse(
+//   fs.readFileSync(
+//     "./config/membership-system-7d179-firebase-adminsdk-fbsvc-51cab596a2.json"
+//   )
+// );
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+// });
 
-// 設置 nodemailer
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "qq26283871@gmail.com",
-    pass: "bqcf cmsq njbf dtzc",
-  },
-});
+// // 設置 nodemailer
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: "qq26283871@gmail.com",
+//     pass: "bqcf cmsq njbf dtzc",
+//   },
+// });
 
 // 註冊 API
 router.post("/", async (req, res) => {

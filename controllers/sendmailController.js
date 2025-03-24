@@ -5,7 +5,7 @@ console.log("EMAIL_USER:", EMAIL_USER);
 console.log("EMAIL_PASS:", EMAIL_PASS ? "Loaded" : "Not Loaded");
 
 export const sendOrderMail = async (req, res) => {
-    const { order_id, user_name, email, recipientName, recipientPhone, total_amount } = req.body;
+    const { order_id, username, email, recipientName, recipientPhone, total_amount } = req.body;
 
     let transporter = nodemailer.createTransport({
         service: "gmail",
@@ -20,7 +20,7 @@ export const sendOrderMail = async (req, res) => {
     to: email,
     subject: `🔔【泉發 Chuan Fa】訂單 #${order_id} 成立通知`,
     html: `
-        <h2>貴賓 ${user_name}，您的訂單已成立！</h2>
+        <h2>貴賓 ${username}，您的訂單已成立！</h2>
         <p>訂單編號: ${order_id}</p>
         <p>收件人: ${recipientName}</p>
         <p>手機號碼: ${recipientPhone}</p>

@@ -55,3 +55,20 @@ export const getProductsById = async(req,res) =>{
     res.status(500).json({ error: err.message });
   }
 }
+
+export const updateOrderStatus = async(req,res)=>{
+  const { status } = req.body;
+  const order_id = req.params.id; 
+  if (!status ||  !order_id){
+    return res.status(400).json({ error: "請提供要修改的訂單ID和狀態" });
+  }
+
+  try {
+    const success = await Order.update(status, order_id);
+    if (success)
+      res.json({ message: "訂單更新成功", order: { status, order_id } });
+    else res.status(400).json({ error: "訂單資料未更新" });
+  } catch (err) {
+    res.status(500).json({ error: "修改訂單失敗", detail: err.message });
+  }
+}

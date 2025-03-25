@@ -74,10 +74,10 @@ const Order = {
   },
 
   // 更新訂單狀態
-  update: async (order_id, status) => {
+  update: async ( status, order_id) => {
     const [result] = await db.query(
       `UPDATE orders SET status = ? WHERE order_id = ?`,
-      [order_id, status]
+      [status, order_id]
     );
     return result.affectedRows > 0;
   },

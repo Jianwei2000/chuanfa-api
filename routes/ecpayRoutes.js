@@ -13,7 +13,7 @@ router.get("/",function(req,res){
   const itemName =
     items.split(',').length > 1
       ? items.split(',').join('#')
-      : '線上商店購買一批'
+      : '泉發聯名商品'
 
       if (!amount) {
         return res.status(400).json({ status: "error", message: "缺少總金額" });
@@ -40,7 +40,7 @@ router.get("/",function(req,res){
   // (二選一)以下這個設定，會有回傳結果，但要用前端的api路由來接收並協助重新導向到前端成功callback頁面(不用時下面要83~97從中的值要註解)
   //const OrderResultURL = 'http://localhost:3000/ecpay/api' //前端成功頁面api路由(POST)
   // (二選一)以下這個設定，不會任何回傳結果(不用時下面要83~97從中的值要註解)
-  const ClientBackURL = `${process.env.FRONTED_URL}/store/order/${MerchantTradeNo}/finish` //前端成功頁面
+  const ClientBackURL = `${process.env.FRONTED_URL}/payCallBack?orderId=${MerchantTradeNo}` //前端成功頁面
   const ChoosePayment = 'ALL'
 
   ////////////////////////以下參數不用改////////////////////////

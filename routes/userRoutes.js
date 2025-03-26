@@ -409,29 +409,31 @@ router.post("/verify-code", async (req, res) => {
 router.post("/reset-password", async (req, res) => {
   const { token, newPassword } = req.body;
 
-  jwt.verify(token, "your_jwt_secret", async (err, decoded) => {
-    if (err) {
-      console.log("JWT Verify Error:", err.message);
-      return res.status(401).json({ message: "無效或過期的新令牌" });
-    }
-    console.log("Decoded Token:", decoded);
+  try {
+    // 驗證 JWT 
+    const decoded = jwt.verify(token, "your_jwt_secret") 
+    console.log("Decoded Token:", decoded)
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const sql = "update users set password = ? where id = ?";
-    db.query(sql, [hashedPassword, decoded.id], (err, results) => {
-      if (err) {
-        console.log("Database Error:", err.message);
-        return res
-          .status(500)
-          .json({ error: "資料庫更新失敗", details: err.message });
-      }
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ message: "用戶不存在" });
-      }
-      console.log("Password Reset Result:", results);
-      res.json({ message: "密碼重設成功" });
-    });
-  });
+    // 加密新密碼
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+    // 更新資料庫中的密碼
+    const sql = 'update users set password = ? where user_id = ?'
+    const [results] = await db.query(sql, [hashedPassword, decoded.id])
+    console.log("Password Reset Result:", results)
+
+    if(results.affectedRows === 0){
+      return res.status(404).json({message: "用戶不存在"})
+    }
+    res.json({message: "密碼重設成功"})
+  } catch(err){
+    if(err.name === "JsonWebTokenError" || err.name === "TokenExpiredError"){
+      console.log("JWT Verify Error:", err.message)
+      return res.status(401).json({message: "無效或過期的新令牌"})
+    }
+    console.error("發生錯誤:", err.message)
+    return res.status(500).json({error: "伺服器錯誤，請稍後再試"})
+  }
 });
 
 export default router;

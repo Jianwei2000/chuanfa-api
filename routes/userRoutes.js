@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 // import cors from 'cors';
 import nodemailer from "nodemailer";
 import admin from "firebase-admin";
-import fs from "fs";
+// import fs from "fs";
 import db from "../config/database.js";
 import { getUserById } from "../controllers/userController.js";
 
@@ -20,14 +20,18 @@ const router = express.Router();
 //   credential: admin.credential.cert(serviceAccount),
 // });
 
-// // 設置 nodemailer
-// const transporter = nodemailer.createTransport({
-//   service: "gmail",
-//   auth: {
-//     user: "qq26283871@gmail.com",
-//     pass: "bqcf cmsq njbf dtzc",
-//   },
-// });
+// 設置 nodemailer
+const { EMAIL_USER, EMAIL_PASS } = process.env;
+console.log("EMAIL_USER:", EMAIL_USER);
+console.log("EMAIL_PASS:", EMAIL_PASS ? "Loaded" : "Not Loaded");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: EMAIL_USER, // 替換為你的 Gmail
+    pass: EMAIL_PASS, // Gmail 應用程式密碼
+  },
+});
 
 // 註冊 API
 router.post("/", async (req, res) => {
@@ -314,32 +318,91 @@ router.post("/forgot-password", async (req, res) => {
     return res.status(400).json({ message: "請提供電子信箱" });
   }
 
-  const sql = "select * from users where email = ?";
-  db.query(sql, [email], async (err, results) => {
-    if (err) {
-      console.log("資料數錯誤", err.message);
-      return res.status(500).json({ error: err.message });
-    }
+  try {
+    const sql = "select * from users where email = ?";
+    console.log("開始查詢資料庫:", sql, email);
+
+    const [results] = await db.query(sql, [email]);
+    console.log("查詢完成");
+    console.log("查詢結果:", results);
+
     if (results.length === 0) {
+      console.log("信箱未註冊");
       return res.status(404).json({ message: "該信箱未註冊" });
     }
 
     const user = results[0];
     const verificationCode = Math.floor(
-      1000000 + Math.random() * 90000
+      100000 + Math.random() * 900000
     ).toString();
-    const expiresAt = new Data(Data.now() + 15 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-    // 將驗證碼放在資料庫
+    // 儲存驗證碼到資料庫
     const insertSql =
       "insert into verification_codes (user_id, code, expires_at) values (?, ?, ?)";
-    db.query(insertSql, [user_id, verificationCode, expiresAt], (err) => {
-      if (err) {
-        console.log("保存驗證碼失敗", err.message);
-        return res.status(500).json({ error: "保存驗證碼失敗" });
-      }
+    await db.query(insertSql, [user.user_id, verificationCode, expiresAt]);
+    console.log("驗證碼已存入資料庫");
+
+    const mailOptions = {
+      from: `"泉發 Chuan Fa" <${EMAIL_USER}>`,
+      to: email,
+      subject: "重設密碼驗證碼",
+      text: `您的驗證碼是 ${verificationCode}，請在15分鐘內重設完畢`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("驗證碼成功寄送到：", email);
+    return res.json({ message: "驗證碼已發送到您的信箱" });
+  } catch (err) {
+    console.error("錯誤發生:", err.message);
+    return res.status(500).json({ error: "伺服器錯誤，請稍後再試" });
+  }
+});
+
+// 驗證碼驗證
+router.post("/verify-code", async (req, res) => {
+  console.log("開始查詢");
+  const { email, code } = req.body;
+
+  // 檢查輸入是否完整
+  if (!email || !code) {
+    return res.status(400).json({ message: "請提供電子信箱和驗證碼" });
+  }
+
+  try {
+    // 查詢用戶
+    const sql = "select * from users where email = ?";
+    console.log("接收到的信箱:", email);
+    const [results] = await db.query(sql, [email]);
+    console.log("查詢結果:", results);
+    if (results.length === 0) {
+      return res.status(400).json({ message: "該信箱未註冊" });
+    }
+
+    const user = results[0];
+
+    // 檢查是否有效
+    const verifySql =
+      "select * from verification_codes where user_id = ? and code =? and expires_at > NOW()";
+    const [verifyResults] = await db.query(verifySql, [user.user_id, code]);
+    if (verifyResults.length === 0) {
+      return res.status(400).json({ message: "驗證碼無效或過期" });
+    }
+
+    // 驗證成功生成 token
+    const resetToken = jwt.sign({ id: user.user_id }, "your_jwt_secret", {
+      expiresIn: "15m",
     });
-  });
+
+    // 刪除已使用的驗證碼
+    const deleteSql = "delete from verification_codes where user_id = ?";
+    const [deleteResults] = await db.query(deleteSql, [user.user_id]);
+
+    return res.json({message: "驗證成功", token: resetToken})
+  } catch (err) {
+    console.error("錯誤發生", err.message);
+    return res.status(500).json({ error: "伺服器錯誤，請稍後再試" });
+  }
 });
 
 // 重設密碼

@@ -9,6 +9,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import sendmailRoutes from "./routes/sendmailRoutes.js";
 import ecpayRoutes from "./routes/ecpayRoutes.js";
 import linepayRoutes from "./routes/linepayRoutes.js";
+import reserveRoutes from "./routes/reserveRoutes.js";
 
 import cors from "cors";
 import { fileURLToPath } from "url";
@@ -53,6 +54,7 @@ app.use("/orders", orderRoutes);
 app.use("/sendmail", sendmailRoutes);
 app.use("/ecpay", ecpayRoutes);
 app.use("/linepay", linepayRoutes);
+app.use("/reserve", reserveRoutes);
 
 
 //設定Server端口

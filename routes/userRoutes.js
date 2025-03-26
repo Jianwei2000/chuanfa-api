@@ -6,7 +6,7 @@ import nodemailer from "nodemailer";
 import admin from "firebase-admin";
 // import fs from "fs";
 import db from "../config/database.js";
-import { getUserById } from "../controllers/userController.js";
+
 
 const router = express.Router();
 
@@ -99,7 +99,7 @@ router.post("/login", async (req, res) => {
 });
 
 //取得會員資料byId
-router.get("/:id", getUserById);
+// router.get("/:id", getUserById);
 
 // 取得會員資料 API (需驗證)
 // router.get('/user', async (req, res) => {

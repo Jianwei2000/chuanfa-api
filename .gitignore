@@ -1,3 +1,4 @@
 node_modules/
 package-lock.json
 config/membership-system-7d179-firebase-adminsdk-fbsvc-51cab596a2.json
+dev.env

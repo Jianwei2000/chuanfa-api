@@ -108,7 +108,7 @@ router.post("/google-login", async (req, res) => {
     const { token } = req.body;
 
     if (!token) {
-      return res.status(400).json({ message: "請提供 google token" });
+      return res.status(400).json({ message: "請提供 Google token" });
     }
 
     // 驗證 token
@@ -121,12 +121,11 @@ router.post("/google-login", async (req, res) => {
     const checkSql = "select * from users where firebase_uid = ?";
     const [results] = await db.query(checkSql, [uid]);
 
-    let user;
     let jwtToken;
 
     if (results.length > 0) {
-      // 用戶存在，生成 jwt token
-      user = results[0];
+      // 用戶存在，生成 JWT token
+      const user = results[0];
       jwtToken = jwt.sign(
         { id: user.user_id, username: user.username, email: user.email },
         "your_jwt_secret",
@@ -134,19 +133,30 @@ router.post("/google-login", async (req, res) => {
       );
     } else {
       // 用戶不存在，創建新用戶
-      const insertSql = "insert into users (username, email, firebase_uid) values (?, ?, ?)"
-      const [insertResult] = await db.query(insertSql, [username, email, uid])
-      const newUserId = insertResult.insertId
+      const insertSql =
+        "insert into users (username, email, firebase_uid) values (?, ?, ?)";
+      const [insertResult] = await db.query(insertSql, [username, email, uid]);
+      const newUserId = insertResult.insertId;
 
       // 生成 JWT token
-      res.json({token: jwtToken})
+      jwtToken = jwt.sign(
+        { id: newUserId, username, email },
+        "your_jwt_secret",
+        { expiresIn: "1h" }
+      );
     }
-  } catch (err){
-    console.error("Google 登入錯誤:", err)
-    if(err.code === "auth/argument-error" || err.code === "auth/invalid-id-token"){
-      return res.status(401).json({message: "無效的 Google ID token"})
+
+    // 統一返回 JWT token
+    res.json({ token: jwtToken });
+  } catch (err) {
+    console.error("Google 登入錯誤:", err);
+    if (
+      err.code === "auth/argument-error" ||
+      err.code === "auth/invalid-id-token"
+    ) {
+      return res.status(401).json({ message: "無效的 Google ID token" });
     }
-    res.status(500).json({error: "伺服器錯誤，請稍後再試"})
+    res.status(500).json({ error: "伺服器錯誤，請稍後再試" });
   }
 });
 

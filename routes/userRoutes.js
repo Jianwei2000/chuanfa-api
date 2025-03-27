@@ -4,21 +4,25 @@ import jwt from "jsonwebtoken";
 // import cors from 'cors';
 import nodemailer from "nodemailer";
 import admin from "firebase-admin";
-// import fs from "fs";
+import fs from "fs";
 import db from "../config/database.js";
-
 
 const router = express.Router();
 
+// 從環境變數中讀取憑證
+const serviceAccountPath = process.env.FIREBASE_CREDENTIALS_PATH;
+
+if (!serviceAccountPath) {
+  throw new Error("FIREBASE_CREDENTIALS_PATH 環境變數未設置");
+}
+
+// 讀取並解析 JSON 文件
+const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf-8"));
+
 // 初始化 Firebase Admin SDK
-// const serviceAccount = JSON.parse(
-//   fs.readFileSync(
-//     "./config/membership-system-7d179-firebase-adminsdk-fbsvc-51cab596a2.json"
-//   )
-// );
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-// });
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 // 設置 nodemailer
 const { EMAIL_USER, EMAIL_PASS } = process.env;
@@ -95,6 +99,54 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Google 登入 API
+router.post("/google-login", async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: "請提供 google token" });
+    }
+
+    // 驗證 token
+    const decoded = await admin.auth().verifyIdToken(token);
+    const uid = decoded.uid;
+    const email = decoded.email;
+    const username = email.split("@")[0];
+
+    // 檢查用戶是否存在
+    const checkSql = "select * from users where firebase_uid = ?";
+    const [results] = await db.query(checkSql, [uid]);
+
+    let user;
+    let jwtToken;
+
+    if (results.length > 0) {
+      // 用戶存在，生成 jwt token
+      user = results[0];
+      jwtToken = jwt.sign(
+        { id: user.user_id, username: user.username, email: user.email },
+        "your_jwt_secret",
+        { expiresIn: "1h" }
+      );
+    } else {
+      // 用戶不存在，創建新用戶
+      const insertSql = "insert into users (username, email, firebase_uid) values (?, ?, ?)"
+      const [insertResult] = await db.query(insertSql, [username, email, uid])
+      const newUserId = insertResult.insertId
+
+      // 生成 JWT token
+      res.json({token: jwtToken})
+    }
+  } catch (err){
+    console.error("Google 登入錯誤:", err)
+    if(err.code === "auth/argument-error" || err.code === "auth/invalid-id-token"){
+      return res.status(401).json({message: "無效的 Google ID token"})
+    }
+    res.status(500).json({error: "伺服器錯誤，請稍後再試"})
   }
 });
 
@@ -268,8 +320,6 @@ router.put("/user", async (req, res) => {
   }
 });
 
-
-
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   console.log("接收的信箱:", email);
@@ -358,7 +408,7 @@ router.post("/verify-code", async (req, res) => {
     const deleteSql = "delete from verification_codes where user_id = ?";
     const [deleteResults] = await db.query(deleteSql, [user.user_id]);
 
-    return res.json({message: "驗證成功", token: resetToken})
+    return res.json({ message: "驗證成功", token: resetToken });
   } catch (err) {
     console.error("錯誤發生", err.message);
     return res.status(500).json({ error: "伺服器錯誤，請稍後再試" });
@@ -370,29 +420,29 @@ router.post("/reset-password", async (req, res) => {
   const { token, newPassword } = req.body;
 
   try {
-    // 驗證 JWT 
-    const decoded = jwt.verify(token, "your_jwt_secret") 
-    console.log("Decoded Token:", decoded)
+    // 驗證 JWT
+    const decoded = jwt.verify(token, "your_jwt_secret");
+    console.log("Decoded Token:", decoded);
 
     // 加密新密碼
-    const hashedPassword = await bcrypt.hash(newPassword, 10)
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // 更新資料庫中的密碼
-    const sql = 'update users set password = ? where user_id = ?'
-    const [results] = await db.query(sql, [hashedPassword, decoded.id])
-    console.log("Password Reset Result:", results)
+    const sql = "update users set password = ? where user_id = ?";
+    const [results] = await db.query(sql, [hashedPassword, decoded.id]);
+    console.log("Password Reset Result:", results);
 
-    if(results.affectedRows === 0){
-      return res.status(404).json({message: "用戶不存在"})
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "用戶不存在" });
     }
-    res.json({message: "密碼重設成功"})
-  } catch(err){
-    if(err.name === "JsonWebTokenError" || err.name === "TokenExpiredError"){
-      console.log("JWT Verify Error:", err.message)
-      return res.status(401).json({message: "無效或過期的新令牌"})
+    res.json({ message: "密碼重設成功" });
+  } catch (err) {
+    if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
+      console.log("JWT Verify Error:", err.message);
+      return res.status(401).json({ message: "無效或過期的新令牌" });
     }
-    console.error("發生錯誤:", err.message)
-    return res.status(500).json({error: "伺服器錯誤，請稍後再試"})
+    console.error("發生錯誤:", err.message);
+    return res.status(500).json({ error: "伺服器錯誤，請稍後再試" });
   }
 });
 

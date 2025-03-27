@@ -160,10 +160,8 @@ router.post("/google-login", async (req, res) => {
   }
 });
 
-//取得會員資料byId
+// 取得會員資料byId
 // router.get("/:id", getUserById);
-
-// 取得會員資料 API (需驗證)
 // router.get('/user', async (req, res) => {
 //   const authHeader = req.headers['authorization'];
 //   console.log('Authorization Header:', authHeader);
@@ -242,94 +240,52 @@ router.post("/google-login", async (req, res) => {
 // 編輯會員資料 API (需驗證)
 router.put("/user", async (req, res) => {
   const authHeader = req.headers["authorization"];
-  console.log("Authorization Header:", authHeader);
-  if (!authHeader) return res.status(401).json({ message: "沒有提供令牌" });
+  console.log("authorization header:", authHeader);
+  if (!authHeader) {
+    return res.status(401).json({ message: "沒有提供令牌" });
+  }
 
   const token = authHeader.split(" ")[1];
-  console.log("Extracted Token:", token);
-  if (!token) return res.status(401).json({ message: "令牌格式錯誤" });
+  console.log("Extracted token:", token);
+  if (!token) {
+    return res.status(401).json({ message: "令牌格式錯誤" });
+  }
 
   try {
-    let decoded;
-    try {
-      decoded = await admin.auth().verifyIdToken(token);
-      console.log("Firebase Decoded Token:", decoded);
-      const uid = decoded.uid;
-      const { username, email } = req.body;
-      console.log("Request Body:", { username, email });
+    // 解析 JWT
+    const decoded = jwt.verify(token, "your_jwt_secret");
+    console.log("JWT decoded token:", decoded);
 
-      if (!username || !email) {
-        return res.status(400).json({ message: "缺少 username 或 email" });
-      }
+    const userId = decoded.id || decoded.uid;
+    const { username, email } = req.body;
+    console.log("Request body:", { username, email });
 
-      const sqlCheck =
-        "SELECT id FROM users WHERE username = ? AND firebase_uid != ?";
-      db.query(sqlCheck, [username, uid], (err, result) => {
-        if (err) {
-          console.error("資料庫錯誤:", err);
-          return res.status(500).json({ message: "內部錯誤" });
-        }
-        if (result.length > 0) {
-          return res.status(400).json({ message: "此使用者名稱已被使用" });
-        }
-
-        const sqlUpdate =
-          "UPDATE users SET username = ?, email = ? WHERE firebase_uid = ?";
-        db.query(sqlUpdate, [username, email, uid], (err, updateResult) => {
-          if (err) {
-            console.error("更新錯誤:", err);
-            return res.status(500).json({ message: "更新失敗" });
-          }
-          res.json({ message: "更新成功" });
-        });
-      });
-    } catch (firebaseErr) {
-      console.log("Firebase Token Verification Failed:", firebaseErr.message);
-      jwt.verify(token, "your_jwt_secret", (jwtErr, jwtDecoded) => {
-        if (jwtErr) {
-          console.log("JWT Verify Error:", jwtErr.message);
-          return res.status(401).json({ message: "無效的令牌" });
-        }
-        console.log("JWT Decoded Token:", jwtDecoded);
-        const { username, email } = req.body;
-        console.log("Request Body:", { username, email });
-
-        if (!username || !email) {
-          return res.status(400).json({ message: "缺少 username 或 email" });
-        }
-
-        const sqlCheck = "SELECT id FROM users WHERE username = ? AND id != ?";
-        db.query(sqlCheck, [username, jwtDecoded.id], (err, result) => {
-          if (err) {
-            console.error("資料庫錯誤:", err);
-            return res.status(500).json({ message: "內部錯誤" });
-          }
-          if (result.length > 0) {
-            return res.status(400).json({ message: "此使用者名稱已被使用" });
-          }
-
-          const sqlUpdate =
-            "UPDATE users SET username = ?, email = ? WHERE id = ?";
-          db.query(
-            sqlUpdate,
-            [username, email, jwtDecoded.id],
-            (err, updateResult) => {
-              if (err) {
-                console.error("更新錯誤:", err);
-                return res.status(500).json({ message: "更新失敗" });
-              }
-              res.json({ message: "更新成功" });
-            }
-          );
-        });
-      });
+    if (!username || !email) {
+      return res.status(400).json({ message: "請輸入使用者或信箱" });
     }
+
+    // 檢查是否存在
+    const checkSql = "select * from users where username = ?, email = ?";
+    const checkResult = await db.query(checkSql, [username, userId]);
+    if (checkResult.length > 0) {
+      return res.status(401).json({ message: "此使用者已被使用" });
+    }
+
+    //更新用戶資料
+    const updateSql = "update users set username = ?, email = ?where id =?";
+    await db.query(updateSql, [username, email, userId]);
+
+    res.json({ message: "更新成功" });
   } catch (err) {
-    console.log("Unexpected Error:", err.message);
+    console.log("Token Verification or Unexpected Error:", err.message);
+    if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "無效或過期的令牌" });
+    }
     res.status(500).json({ error: "伺服器錯誤", details: err.message });
   }
 });
 
+// 忘記密碼
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   console.log("接收的信箱:", email);

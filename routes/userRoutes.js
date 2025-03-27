@@ -102,6 +102,54 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Google 登入 API
+router.post("/google-login", async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: "請提供 google token" });
+    }
+
+    // 驗證 token
+    const decoded = await admin.auth().verifyIdToken(token);
+    const uid = decoded.uid;
+    const email = decoded.email;
+    const username = email.split("@")[0];
+
+    // 檢查用戶是否存在
+    const checkSql = "select * from users where firebase_uid = ?";
+    const [results] = await db.query(checkSql, [uid]);
+
+    let user;
+    let jwtToken;
+
+    if (results.length > 0) {
+      // 用戶存在，生成 jwt token
+      user = results[0];
+      jwtToken = jwt.sign(
+        { id: user.user_id, username: user.username, email: user.email },
+        "your_jwt_secret",
+        { expiresIn: "1h" }
+      );
+    } else {
+      // 用戶不存在，創建新用戶
+      const insertSql = "insert into users (username, email, firebase_uid) values (?, ?, ?)"
+      const [insertResult] = await db.query(insertSql, [username, email, uid])
+      const newUserId = insertResult.insertId
+
+      // 生成 JWT token
+      res.json({token: jwtToken})
+    }
+  } catch (err){
+    console.error("Google 登入錯誤:", err)
+    if(err.code === "auth/argument-error" || err.code === "auth/invalid-id-token"){
+      return res.status(401).json({message: "無效的 Google ID token"})
+    }
+    res.status(500).json({error: "伺服器錯誤，請稍後再試"})
+  }
+});
+
 //取得會員資料byId
 // router.get("/:id", getUserById);
 

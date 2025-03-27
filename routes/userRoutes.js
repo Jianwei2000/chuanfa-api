@@ -268,47 +268,7 @@ router.put("/user", async (req, res) => {
   }
 });
 
-// 忘記密碼 - 發送重設連結到信箱
-// app.post('/api/forgot-password', async (req, res) => {
-//     const { email } = req.body;
-//     console.log('Received email:', email)
 
-//     if (!email) {
-//         return res.status(400).json({message: '請提供電子信箱'})
-//     }
-
-//     const sql = 'select * from users where email = ?'
-//     db.query(sql, [email], async (err, results) => {
-//         if (err) {
-//             console.log('資料庫錯誤:', err.message);
-//             return res.status(500).json({error: err.message})
-//         }
-//         if (results.length === 0) {
-//             return res.status(404).json({message: '該信箱未註冊'});
-//         }
-
-//         const user = results[0]
-//         const resetToken = jwt.sign({id: user.id}, 'your_jwt_secret', {expiresIn: '15m'})
-//         const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`
-
-//         const mailOptions = {
-//             from: 'qq26283871@gmail.com',
-//             to: email,
-//             subject: '重設密碼',
-//             text: `請點擊以下連結重設您的密碼（15分鐘內有效）: ${resetLink}`,
-//         }
-//         console.log('Mail Option:', mailOptions)
-
-//         try {
-//             await transporter.sendMail(mailOptions)
-//             console.log('Reset email sent to:', email)
-//             return res.json({message: '重設密碼連結已發送到您的信箱'})
-//         } catch (err) {
-//             console.error('Email Error:', err.message);
-//             return res.status(500).json({error: '發送郵件失敗'})
-//         }
-//     })
-// })
 
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;

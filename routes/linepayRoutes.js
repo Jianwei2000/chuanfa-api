@@ -20,7 +20,7 @@ const linePayClient = createLinePayClient({
 router.get('/reserve', async (req, res) => {
   // 設定重新導向與失敗導向的網址
   const redirectUrls = {
-    confirmUrl: `${process.env.FRONTED_URL}/store/order/${req.query.orderId}/finish`,
+    confirmUrl: `${process.env.FRONTED_URL}/payCallBack?orderId=${req.query.orderId}`,
     cancelUrl: `${process.env.FRONTED_URL}/store/order/${req.query.orderId}/pay`,
   }
   // 只需要金額，其它都是範例資料

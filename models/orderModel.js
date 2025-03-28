@@ -2,26 +2,45 @@ import db from "../config/database.js";
 
 const Order = {
   //訂單ID取得所有資料
-  getById: async(id)=>{
+  getById: async (id, isUserId = false) => {
+    if(!isUserId){
 
-    const [result] = await db.query(`
-      SELECT o.*, od.* ,u.*
-      FROM orders o
-      INNER JOIN order_details od ON o.order_id = od.order_id
-      INNER JOIN users u ON o.user_id = u.user_id 
-      WHERE o.order_id = ? ;`, [id]);
-      return result.length ? result[0] : null;
+      const [resultOrder] = await db.query(
+        `
+        SELECT o.*, od.* ,u.*
+        FROM orders o
+        INNER JOIN order_details od ON o.order_id = od.order_id
+        INNER JOIN users u ON o.user_id = u.user_id 
+        WHERE o.order_id = ? ;`,
+        [id]
+      );
+      return resultOrder.length ? resultOrder[0] : null;
+    }else{
+      const [userOrders] = await db.query(
+        `
+        SELECT o.*, od.* ,u.*
+        FROM orders o
+        INNER JOIN order_details od ON o.order_id = od.order_id
+        INNER JOIN users u ON o.user_id = u.user_id 
+        WHERE o.user_id = ? ;`,
+        [id]
+      );
+      return userOrders.length ? userOrders : [];
+    }
   },
 
   //訂單ID取得購買的商品
-  getProducts: async(id)=>{
-    const [result] = await db.query(`
+  getProducts: async (id) => {
+    const [result] = await db.query(
+      `
       SELECT p.*
       FROM order_details od
       INNER JOIN orders o ON od.order_id = o.order_id
       INNER JOIN products p ON od.product_id = p.product_id
-      WHERE o.order_id = ?;`, [id]);
-      return result.length ? result : []; 
+      WHERE o.order_id = ?;`,
+      [id]
+    );
+    return result.length ? result : [];
   },
 
   // 新增訂單
@@ -74,7 +93,7 @@ const Order = {
   },
 
   // 更新訂單狀態
-  update: async ( status, order_id) => {
+  update: async (status, order_id) => {
     const [result] = await db.query(
       `UPDATE orders SET status = ? WHERE order_id = ?`,
       [status, order_id]

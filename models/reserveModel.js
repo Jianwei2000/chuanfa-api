@@ -13,16 +13,18 @@ const Reserve = {
     customer_phone,
     reservation_date,
     number_of_people,
-    table_id
+    table_id,
+    user_id
   ) => {
     const [result] = await db.query(
-      `INSERT INTO reservations (customer_name, customer_phone, reservation_date, number_of_people, table_id) VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO reservations (customer_name, customer_phone, reservation_date, number_of_people, table_id, user_id) VALUES (?, ?, ?, ?, ?, ?)`,
       [
         customer_name,
         customer_phone,
         reservation_date,
         number_of_people,
         table_id,
+        user_id
       ]
     );
     return result.insertId;
@@ -56,6 +58,15 @@ const Reserve = {
 
     return result;
   },
+
+  getUserRes: async(user_id)=>{
+    const [result] = await db.query(`
+      SELECT * FROM reservations
+      WHERE user_id = ?
+  `,[user_id]);
+
+  return result;
+  }
   // 更新會員資料
   //   update: async (id, name, email, mobile, birthday, address) => {
   //     const [result] = await db.query(

@@ -9,7 +9,8 @@ import {
 const router = express.Router();
 
 
-router.get("/:id", getOrderById); // 取得訂單
+router.get("/:order_id", getOrderById); // 取得訂單
+router.get("/user/:user_id", getOrderById); // 取得會員訂單
 router.get("/:id/products", getProductsById); // 取得購買的商品資料
 router.post("/", createOrder); // 新增訂單
 router.put("/:id", updateOrderStatus); // 修改訂單狀態

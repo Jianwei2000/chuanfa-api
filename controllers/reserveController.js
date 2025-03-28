@@ -2,12 +2,12 @@ import Reserve from "../models/reserveModel.js";
 
 // 新增預約資料
 export const createReserve = async (req, res) => {
-  const { customer_name, customer_phone, reservation_date, number_of_people, table_id } = req.body;
-  if (!customer_name || !customer_phone || !reservation_date || !number_of_people || !table_id)
+  const { customer_name, customer_phone, reservation_date, number_of_people, table_id, user_id } = req.body;
+  if (!customer_name || !customer_phone || !reservation_date || !number_of_people || !table_id || !user_id)
     return res.status(400).json({ error: "所有欄位為不可為空" });
 
   try {
-    const insertId = await Reserve.create(customer_name, customer_phone, reservation_date, number_of_people, table_id);
+    const insertId = await Reserve.create(customer_name, customer_phone, reservation_date, number_of_people, table_id, user_id);
 
     // 檢查插入的訂單是否成功，並且 order_id 是否有效
     if (!insertId) {
@@ -16,7 +16,7 @@ export const createReserve = async (req, res) => {
 
     res.status(201).json({
       message: "預約建立成功",
-      Reserve: { id:insertId, customer_name, customer_phone, reservation_date, number_of_people, table_id}
+      Reserve: { id:insertId, customer_name, customer_phone, reservation_date, number_of_people, table_id, user_id}
     });
   } catch (err) {
       console.error("後端錯誤:", err);
@@ -58,6 +58,22 @@ export const getAllTables = async (req, res)=>{
 
     // 返回已預約的桌子資料
     res.json({ message: "所有座位取得成功", tables });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+};
+
+//取得會員預約資料
+export const getUserReserve = async (req, res)=>{
+    try {
+      const { id } = req.params;
+      if (id) {
+        const userRes = await Reserve.getUserRes(id);
+        if (!userRes) {
+          return res.status(404).json({ error: "沒有預約資料" });
+        }
+        return res.json({ message: "預約資料取得成功", userRes });
+      }
       } catch (err) {
         res.status(500).json({ error: err.message });
       }

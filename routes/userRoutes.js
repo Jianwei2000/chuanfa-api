@@ -186,7 +186,7 @@ router.get("/user", async (req, res) => {
     console.log("User id:", userId);
 
     // 查詢用戶資料
-    const sql = "select username, email from users where user_id = ?";
+    const sql = "select user_id, username, email from users where user_id = ?";
     const [results] = await db.query(sql, [userId]);
 
     if (results.length === 0) {

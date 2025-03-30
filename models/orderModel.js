@@ -18,11 +18,9 @@ const Order = {
     }else{
       const [userOrders] = await db.query(
         `
-        SELECT o.*, od.* ,u.*
-        FROM orders o
-        INNER JOIN order_details od ON o.order_id = od.order_id
-        INNER JOIN users u ON o.user_id = u.user_id 
-        WHERE o.user_id = ? ;`,
+        SELECT *
+        FROM orders 
+        WHERE user_id = ? ;`,
         [id]
       );
       return userOrders.length ? userOrders : [];

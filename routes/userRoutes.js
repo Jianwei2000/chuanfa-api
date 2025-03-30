@@ -238,7 +238,7 @@ router.put("/user", async (req, res) => {
     // 檢查是否存在
     const checkSql = "select * from users where username = ? and user_id != ?";
     console.log("開始查詢");
-    const [checkResult] = await db.query(checkSql, [username, userId]); 
+    const [checkResult] = await db.query(checkSql, [username, userId]);
     console.log("查詢完成，結果:", checkResult);
     if (checkResult.length > 0) {
       return res.status(409).json({ message: "此使用者名稱已被使用" });
@@ -248,10 +248,13 @@ router.put("/user", async (req, res) => {
     //更新用戶資料
     const updateSql =
       "update users set username = ?, email = ? where user_id = ?";
-    console.log("開始更新");
-    await db.query(updateSql, [username, email, userId]);
+    const [updateResults] = await db.query(updateSql, [
+      username,
+      email,
+      userId,
+    ]);
     console.log("完成更新");
-    res.json({ message: "更新成功" });
+    res.json({ message: "更新成功", user: updateResults[0] });
   } catch (err) {
     console.log(err);
     console.log("Token Verification or Unexpected Error:", err.message);

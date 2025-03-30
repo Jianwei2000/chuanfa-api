@@ -78,3 +78,21 @@ export const getUserReserve = async (req, res)=>{
         res.status(500).json({ error: err.message });
       }
 };
+
+//更改預約狀態邏輯
+export const updateReserve = async (req, res) => {
+  const { status } = req.body;
+  const reservation_id = req.params.id;
+  if (!status || !reservation_id) {
+    return res.status(400).json({ error: "請提供要修改的預約ID和狀態" });
+  }
+
+  try {
+    const success = await Reserve.update(status, reservation_id);
+    if (success)
+      res.json({ message: "預約更新成功", reserve: { status, reservation_id } });
+    else res.status(400).json({ error: "預約資料未更新" });
+  } catch (err) {
+    res.status(500).json({ error: "修改預約狀態失敗", detail: err.message });
+  }
+};

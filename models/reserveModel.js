@@ -62,9 +62,10 @@ const Reserve = {
   getUserRes: async (user_id) => {
     const [result] = await db.query(
       `
-      SELECT * FROM reservations
-      WHERE user_id = ?
-      ORDER BY reservation_date DESC
+      SELECT * FROM reservations r
+      JOIN tables t ON r.table_id = t.table_id
+      WHERE r.user_id = ?
+      ORDER BY r.reservation_date DESC
   `,
       [user_id]
     );

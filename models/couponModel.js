@@ -8,24 +8,26 @@ const Coupon = {
     },
   
     // 透過 user ID 取得他所擁有的優惠券
-    getById: async (id,code) => {
+    getById: async (id, code) => {
       let query = `
-            SELECT *, cr.id FROM coupons_records cr 
-            LEFT JOIN coupons c ON cr.coupon_id = c.id 
-            WHERE user_id = ?
-            ORDER BY cr.id DESC`;
-
-      let params = [id]; // 先加上 user_id
-
+          SELECT *, cr.id FROM coupons_records cr 
+          LEFT JOIN coupons c ON cr.coupon_id = c.id 
+          WHERE cr.user_id = ?`; // 確保 WHERE 結尾正確
+  
+      let params = [id];
+  
       if (code) { 
-        query += ` AND c.code = ? AND cr.status = "未使用" LIMIT 1`;
-        params.push(code); // 如果 code 存在才加到參數
+          query += ` AND c.code = ? AND cr.status = '未使用'`;
+          params.push(code);
       }
-
+  
+      query += ` ORDER BY cr.id DESC LIMIT 1`; // 確保 ORDER BY 在 WHERE 之後
+  
       const [result] = await db.query(query, params);
       
       return result.length ? result : [];
-    }, 
+  },
+  
 
     // 新增會員優惠券
     create: async (user_id, coupon_id, draw_date) => {

@@ -24,7 +24,7 @@ const Reserve = {
         reservation_date,
         number_of_people,
         table_id,
-        user_id
+        user_id,
       ]
     );
     return result.insertId;
@@ -59,22 +59,25 @@ const Reserve = {
     return result;
   },
 
-  getUserRes: async(user_id)=>{
-    const [result] = await db.query(`
+  getUserRes: async (user_id) => {
+    const [result] = await db.query(
+      `
       SELECT * FROM reservations
       WHERE user_id = ?
-  `,[user_id]);
+  `,
+      [user_id]
+    );
 
-  return result;
-  }
-  // 更新會員資料
-  //   update: async (id, name, email, mobile, birthday, address) => {
-  //     const [result] = await db.query(
-  //       `UPDATE users SET user_name = ?, email = ?, phone_number = ?, address = ?, birthday = ? WHERE user_id = ?`,
-  //       [name, email, mobile, address || "", birthday || null, id]
-  //     );
-  //     return result.affectedRows > 0;
-  //   },
+    return result;
+  },
+  // 更新預約狀態
+  update: async (status, reservation_id) => {
+    const [result] = await db.query(
+      `UPDATE reservations SET status = ? WHERE reservation_id = ?`,
+      [status, reservation_id]
+    );
+    return result.affectedRows > 0;
+  },
 };
 
 export default Reserve;

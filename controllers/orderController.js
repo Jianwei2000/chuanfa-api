@@ -88,7 +88,7 @@ export const getOrderById = async (req, res) => {
       // 根據 user_id 查詢所有訂單
       const orders = await Order.getById(user_id, true);  // 查詢使用者的所有訂單
       if (orders.length === 0) {
-        return res.status(404).json({ error: "該使用者沒有訂單" });
+        return res.json({ message: "使用者沒有訂單", orders: [] }); 
       }
       return res.json({ message: "使用者訂單資料取得成功", orders });
     }

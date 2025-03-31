@@ -18,7 +18,7 @@ export const getCouponById = async (req, res)=>{
         
         const userCoupons = await Coupon.getById(id, code);
 
-        if (!userCoupons || userCoupons.length === 0) return res.status(404).json({ error: "沒有任何優惠券" });
+        if (!userCoupons || userCoupons.length === 0) return res.json({ message: "沒有優惠券", userCoupons: [] });
         res.json({ message: "優惠券資料取得成功", userCoupons });
       } catch (err) {
         res.status(500).json({ error: err.message });

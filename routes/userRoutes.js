@@ -186,7 +186,8 @@ router.get("/user", async (req, res) => {
     console.log("User id:", userId);
 
     // 查詢用戶資料
-    const sql = "select user_id, username, email from users where user_id = ?";
+    const sql =
+      "select user_id, username, email, phone_number, address, birthday from users where user_id = ?";
     const [results] = await db.query(sql, [userId]);
 
     if (results.length === 0) {
@@ -228,8 +229,14 @@ router.put("/user", async (req, res) => {
     console.log("JWT decoded token:", decoded);
 
     const userId = decoded.id || decoded.uid;
-    const { username, email } = req.body;
-    console.log("Request body:", { username, email });
+    const { username, email, phone_number, address, birthday } = req.body;
+    console.log("Request body:", {
+      username,
+      email,
+      phone_number,
+      address,
+      birthday,
+    });
 
     if (!username || !email) {
       return res.status(400).json({ message: "請輸入使用者或信箱" });
@@ -247,14 +254,39 @@ router.put("/user", async (req, res) => {
 
     //更新用戶資料
     const updateSql =
-      "update users set username = ?, email = ? where user_id = ?";
+      "update users set username = ?, email = ?, phone_number = ?, address = ?, birthday = ? where user_id = ?";
     const [updateResults] = await db.query(updateSql, [
       username,
       email,
+      phone_number || null,
+      address || null,
+      birthday || null,
       userId,
     ]);
     console.log("完成更新");
-    res.json({ message: "更新成功", user: updateResults[0] });
+    if(updateResults.affectedRows === 0){
+      return res.status(404).json({message: "查無此用戶"})
+    }
+
+    // 查詢更新後的用戶資料
+    const [userResult] = await db.query(
+      "select user_id, username, email, phone_number, address, birthday from users where user_id = ?",
+      [userId]
+    )
+    const updatedUser = userResult[0]
+
+    // 生成新 JWT token
+    const newToken = jwt.sign(
+      {
+        id: updatedUser.user_id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+      },
+      'your_jwt_secret',
+      {expiresIn: "1h"}
+    )
+
+    res.json({ message: "更新成功", token: newToken, user: updatedUser });
   } catch (err) {
     console.log(err);
     console.log("Token Verification or Unexpected Error:", err.message);

@@ -12,7 +12,8 @@ const Coupon = {
       let query = `
             SELECT *, cr.id FROM coupons_records cr 
             LEFT JOIN coupons c ON cr.coupon_id = c.id 
-            WHERE user_id = ?`;
+            WHERE user_id = ?
+            ORDER BY cr.id DESC`;
 
       let params = [id]; // 先加上 user_id
 

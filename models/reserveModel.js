@@ -64,6 +64,7 @@ const Reserve = {
       `
       SELECT * FROM reservations
       WHERE user_id = ?
+      ORDER BY reservation_date DESC
   `,
       [user_id]
     );

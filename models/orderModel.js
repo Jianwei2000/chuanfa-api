@@ -20,7 +20,8 @@ const Order = {
         `
         SELECT *
         FROM orders 
-        WHERE user_id = ? ;`,
+        WHERE user_id = ? 
+        ORDER BY order_date DESC;`,
         [id]
       );
       return userOrders.length ? userOrders : [];

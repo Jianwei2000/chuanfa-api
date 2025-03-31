@@ -283,7 +283,7 @@ router.put("/user", async (req, res) => {
         email: updatedUser.email,
       },
       "your_jwt_secret",
-      { expiresIn: "1h" }
+      { expiresIn: "12h" }
     );
 
     res.json({ message: "更新成功", token: newToken, user: updatedUser });

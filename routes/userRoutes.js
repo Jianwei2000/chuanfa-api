@@ -91,7 +91,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { id: user.user_id, username: user.username, email: user.email },
       "your_jwt_secret",
-      { expiresIn: "1h" }
+      { expiresIn: "12h" }
     );
 
     // 返回 JWT token
@@ -129,7 +129,7 @@ router.post("/google-login", async (req, res) => {
       jwtToken = jwt.sign(
         { id: user.user_id, username: user.username, email: user.email },
         "your_jwt_secret",
-        { expiresIn: "1h" }
+        { expiresIn: "12h" }
       );
     } else {
       // 用戶不存在，創建新用戶
@@ -142,7 +142,7 @@ router.post("/google-login", async (req, res) => {
       jwtToken = jwt.sign(
         { id: newUserId, username, email },
         "your_jwt_secret",
-        { expiresIn: "1h" }
+        { expiresIn: "12h" }
       );
     }
 
@@ -264,16 +264,16 @@ router.put("/user", async (req, res) => {
       userId,
     ]);
     console.log("完成更新");
-    if(updateResults.affectedRows === 0){
-      return res.status(404).json({message: "查無此用戶"})
+    if (updateResults.affectedRows === 0) {
+      return res.status(404).json({ message: "查無此用戶" });
     }
 
     // 查詢更新後的用戶資料
     const [userResult] = await db.query(
       "select user_id, username, email, phone_number, address, birthday from users where user_id = ?",
       [userId]
-    )
-    const updatedUser = userResult[0]
+    );
+    const updatedUser = userResult[0];
 
     // 生成新 JWT token
     const newToken = jwt.sign(
@@ -282,9 +282,9 @@ router.put("/user", async (req, res) => {
         username: updatedUser.username,
         email: updatedUser.email,
       },
-      'your_jwt_secret',
-      {expiresIn: "1h"}
-    )
+      "your_jwt_secret",
+      { expiresIn: "1h" }
+    );
 
     res.json({ message: "更新成功", token: newToken, user: updatedUser });
   } catch (err) {

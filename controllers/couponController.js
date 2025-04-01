@@ -47,3 +47,21 @@ export const createUserCoupon = async (req, res) => {
         res.status(500).json({ error: "優惠券新增失敗", detail: err.message });
     }
 };
+
+//更新優惠券狀態
+export const updateUserCoupon = async (req,res) => {
+    const { status } = req.body;
+    const id = req.params.id;
+    if (!status || !id) {
+      return res.status(400).json({ error: "請提供要修改的優惠券ID和狀態" });
+    }
+  
+    try {
+      const success = await Coupon.update(status, id);
+      if (success)
+        res.json({ message: "優惠券更新成功", coupon: { status, id } });
+      else res.status(400).json({ error: "優惠券資料未更新" });
+    } catch (err) {
+      res.status(500).json({ error: "修改優惠券狀態失敗", detail: err.message });
+    }
+}

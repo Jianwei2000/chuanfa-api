@@ -65,7 +65,7 @@ const Reserve = {
       SELECT * FROM reservations r
       JOIN tables t ON r.table_id = t.table_id
       WHERE r.user_id = ?
-      ORDER BY r.reservation_date DESC
+      ORDER BY r.reservation_date ASC
   `,
       [user_id]
     );

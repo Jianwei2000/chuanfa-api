@@ -424,4 +424,93 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
+// 驗證舊密碼
+router.post("/verify-password", async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) {
+    return res.status(401).json({ message: "沒有提供令牌" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "令牌格式錯誤" });
+  }
+
+  try {
+    // 解析 JWT
+    const decoded = jwt.verify(token, "your_jwt_secret");
+    const userId = decoded.id;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: "請提供舊密碼" });
+    }
+
+    // 查詢運戶
+    const sql = "SELECT * from users where user_id = ?";
+    const [results] = await db.query(sql, [userId]);
+    if (results.length === 0) {
+      return res.status(404).json("用戶不存在");
+    }
+    const user = results[0];
+
+    // 比對就密碼
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "舊密碼不正確" });
+    }
+
+    res.json({ message: "驗證成功" });
+  } catch (err) {
+    console.error("驗證舊密碼錯誤:", err);
+    if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "無效或過期的令牌" });
+    }
+    res.status(500).json({ error: "伺服器錯誤，請稍後再試" });
+  }
+});
+
+// 更新密碼 API
+router.put("/change-password", async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) {
+    return res.status(401).json({ message: "沒有提供令牌" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "令牌格式錯誤" });
+  }
+
+  try {
+    // 解析 JWT
+    const decoded = jwt.verify(token, "your_jwt_secret");
+    const userId = decoded.id;
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return res.status(400).json({ message: "請提供新密碼" });
+    }
+
+    // 加密新密碼
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // 更新密碼
+    const sql = "UPDATE users SET password = ? WHERE user_id = ?";
+    const [results] = await db.query(sql, [hashedPassword, userId]);
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "用戶不存在" });
+    }
+
+    res.json({ message: "密碼更新成功" });
+  } catch (err) {
+    console.error("更新密碼錯誤:", err);
+    if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "無效或過期的令牌" });
+    }
+    res.status(500).json({ error: "伺服器錯誤，請稍後再試" });
+  }
+});
+
 export default router;
